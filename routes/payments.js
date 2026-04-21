@@ -168,14 +168,14 @@ router.post('/:id/reject', auth.requireAdmin, function(req, res) {
         .then(function() {
           // Emit socket events
           if (req.app.get('io')) {
-            req.app.get('io').emit('payment:rejected', { 
+            req.app.get('io').to('room:' + payment.room_id).emit('payment:rejected', { 
               payment_id: paymentId, 
               ticket_id: payment.ticket_id, 
               room_id: payment.room_id, 
               note: note 
             });
             // Notify that the number is now available
-            req.app.get('io').emit('ticket:released', { 
+            req.app.get('io').to('room:' + payment.room_id).emit('ticket:released', { 
               room_id: payment.room_id, 
               number: payment.number,
               status: 'available' 
@@ -216,7 +216,7 @@ router.get('/bank-details', function(req, res) {
   });
 });
 
-// Admin: Get stuck tickets (pending without payment for > 10 minutes)
+// Admin: Get stuck tickets (pending without payment - instant for testing)
 router.get('/stuck-tickets', auth.requireAdmin, function(req, res) {
   var sql = [
     'SELECT t.*, u.username, u.first_name, r.title AS room_title,',
@@ -224,7 +224,7 @@ router.get('/stuck-tickets', auth.requireAdmin, function(req, res) {
     'FROM tickets t',
     'JOIN users u ON t.user_id = u.id',
     'JOIN rooms r ON t.room_id = r.id',
-    'WHERE t.status = ? AND TIMESTAMPDIFF(MINUTE, t.created_at, NOW()) > 10',
+    'WHERE t.status = ?',
     'ORDER BY t.created_at ASC'
   ].join(' ');
   
@@ -259,7 +259,7 @@ router.post('/tickets/:id/force-release', auth.requireAdmin, function(req, res) 
         .then(function() {
           // Emit socket event
           if (req.app.get('io')) {
-            req.app.get('io').emit('ticket:released', {
+            req.app.get('io').to('room:' + ticket.room_id).emit('ticket:released', {
               room_id: ticket.room_id,
               number: ticket.number,
               status: 'available'
