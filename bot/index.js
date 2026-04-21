@@ -10,8 +10,9 @@ var ADMIN_TELEGRAM_ID = parseInt(process.env.ADMIN_TELEGRAM_ID) || 0;
 var FRONTEND_URL      = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 if (!BOT_TOKEN) {
-  console.error('[Bot] BOT_TOKEN is not set in .env');
-  process.exit(1);
+  console.error('[Bot] BOT_TOKEN is not set — bot disabled');
+  module.exports = { bot: null, notifyAdminNewPayment: function() {} };
+  return;
 }
 
 var bot = new Telegraf(BOT_TOKEN);
@@ -225,9 +226,5 @@ bot.launch()
   .catch(function(err) {
     console.error('[Bot] Failed to start:', err.message);
   });
-
-// Graceful stop
-process.once('SIGINT',  function() { bot.stop('SIGINT');  });
-process.once('SIGTERM', function() { bot.stop('SIGTERM'); });
 
 module.exports = { bot: bot, notifyAdminNewPayment: notifyAdminNewPayment };

@@ -76,6 +76,15 @@ io.on('connection', function(socket) {
 // ─── Background jobs ──────────────────────────────────────────────────────────
 startTicketExpiryJob(io);
 
+// ─── Start bot ────────────────────────────────────────────────────────────────
+// Start Telegram bot alongside the server
+try {
+  require('./bot/index');
+  console.log('[Bot] Telegram bot started');
+} catch(err) {
+  console.error('[Bot] Failed to start bot:', err.message);
+}
+
 // ─── Start ────────────────────────────────────────────────────────────────────
 server.listen(PORT, function() {
   console.log('╔════════════════════════════════════════╗');
