@@ -14,7 +14,7 @@ router.get('/', auth.requireAuth, function(req, res) {
     'SELECT r.id, r.title, r.entry_fee, r.prize_1st, r.prize_2nd, r.prize_3rd,',
     '  r.total_slots, r.filled_slots, r.draw_at, r.created_at',
     'FROM rooms r',
-    'WHERE r.status = "completed"',
+    'WHERE r.status = ?',
     'ORDER BY r.draw_at DESC',
     'LIMIT 50'
   ].join(' ');
@@ -30,7 +30,7 @@ router.get('/', auth.requireAuth, function(req, res) {
   ].join(' ');
 
   Promise.all([
-    db.execute(roomsSql),
+    db.execute(roomsSql, ['completed']),
     db.execute(winnersSql)
   ])
     .then(function(results) {

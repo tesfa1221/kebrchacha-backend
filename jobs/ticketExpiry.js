@@ -12,13 +12,13 @@ function startTicketExpiryJob(io) {
     var sql = [
       'SELECT t.id, t.room_id, t.number, t.user_id',
       'FROM tickets t',
-      'LEFT JOIN payments p ON p.ticket_id = t.id AND p.status = "pending"',
-      'WHERE t.status = "pending"',
+      'LEFT JOIN payments p ON p.ticket_id = t.id AND p.status = ?',
+      'WHERE t.status = ?',
       '  AND t.created_at < DATE_SUB(NOW(), INTERVAL 30 MINUTE)',
-      '  AND p.id IS NULL'  // no payment uploaded either
+      '  AND p.id IS NULL'
     ].join(' ');
 
-    db.execute(sql)
+    db.execute(sql, ['pending', 'pending'])
       .then(function(results) {
         var expired = results[0];
         if (!expired || expired.length === 0) return;
