@@ -58,6 +58,32 @@ router.delete('/:id', auth.requireAdmin, function(req, res) {
     .catch(function(err) { console.error('[Rooms/cancel]', err); return res.status(500).json({ error: 'Failed to cancel room' }); });
 });
 
+router.delete('/:id/permanent', auth.requireAdmin, function(req, res) {
+  var roomId = parseInt(req.params.id);
+  
+  // Only allow deletion of completed or cancelled rooms
+  db.execute('SELECT * FROM rooms WHERE id = ? AND status IN (?, ?)', [roomId, 'completed', 'cancelled'])
+    .then(function(results) {
+      if (!results[0] || results[0].length === 0) {
+        return Promise.reject({ status: 400, message: 'Can only delete completed or cancelled rooms' });
+      }
+      
+      // Delete in order: winners -> payments -> tickets -> room
+      return db.execute('DELETE FROM winners WHERE room_id = ?', [roomId])
+        .then(function() { return db.execute('DELETE FROM payments WHERE room_id = ?', [roomId]); })
+        .then(function() { return db.execute('DELETE FROM tickets WHERE room_id = ?', [roomId]); })
+        .then(function() { return db.execute('DELETE FROM rooms WHERE id = ?', [roomId]); });
+    })
+    .then(function() {
+      return res.json({ message: 'Room permanently deleted' });
+    })
+    .catch(function(err) {
+      if (err.status) return res.status(err.status).json({ error: err.message });
+      console.error('[Rooms/permanent-delete]', err);
+      return res.status(500).json({ error: 'Failed to delete room' });
+    });
+});
+
 router.post('/:id/draw', auth.requireAdmin, function(req, res) {
   var roomId = parseInt(req.params.id);
   db.execute('SELECT * FROM rooms WHERE id = ? AND status = ?', [roomId, 'locked'])
