@@ -2,27 +2,31 @@
 
 var rateLimit = require('express-rate-limit');
 
-// General API limiter
+// General API — 500 requests per 15 min (generous for real users)
 var apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100,
-  message: { error: 'Too many requests, please try again later.' },
+  windowMs: 15 * 60 * 1000,
+  max: 500,
+  message: { error: 'ብዙ ጥያቄዎች። ትንሽ ቆይተው ይሞክሩ።' },
   standardHeaders: true,
-  legacyHeaders: false
+  legacyHeaders: false,
+  skip: function(req) {
+    // Never rate-limit health checks
+    return req.path === '/health';
+  }
 });
 
-// Strict limiter for auth routes
+// Auth routes — 50 per 15 min
 var authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 20,
-  message: { error: 'Too many login attempts, please try again later.' }
+  max: 50,
+  message: { error: 'ብዙ ሙከራዎች። ትንሽ ቆይተው ይሞክሩ።' }
 });
 
-// Upload limiter
+// Upload — 20 per 10 min
 var uploadLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
-  max: 10,
-  message: { error: 'Too many uploads, please wait before trying again.' }
+  max: 20,
+  message: { error: 'ብዙ ስቅሎች። ትንሽ ቆይተው ይሞክሩ።' }
 });
 
 module.exports = { apiLimiter, authLimiter, uploadLimiter };
