@@ -101,3 +101,14 @@ server.listen(PORT, function() {
 process.on('SIGTERM', function() {
   server.close(function() { process.exit(0); });
 });
+
+// ─── Crash protection ─────────────────────────────────────────────────────────
+process.on('uncaughtException', function(err) {
+  console.error('[CRASH] uncaughtException:', err.message, err.stack);
+  // keep running — don't exit
+});
+
+process.on('unhandledRejection', function(reason) {
+  console.error('[CRASH] unhandledRejection:', reason);
+  // keep running — don't exit
+});
