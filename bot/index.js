@@ -46,42 +46,61 @@ bot.start(function(ctx) {
   var firstName = (ctx.from && ctx.from.first_name) || 'ተጫዋች';
   var isAdmin   = ctx.from && ctx.from.id === ADMIN_TELEGRAM_ID;
 
-  var lines = [
-    '🎰 እንኳን ደህና መጡ ወደ ከበርቻቻ!',
-    '',
-    'ሰላም ' + firstName + '! 👋',
-    '',
-    '🏆 እንዴት መጫወት እንደሚቻል:',
-    '1. የጨዋታ ሎቢ ይክፈቱ',
-    '2. ንቁ ክፍል ይምረጡ',
-    '3. ቁጥርዎን ይምረጡ (1-50)',
-    '4. የክፍያ ቅጽበታዊ ምስል ይጫኑ',
-    '5. የአስተዳዳሪ ማረጋገጫ ይጠብቁ',
-    '6. 50 ቦታዎች ሲሞሉ ዕጣ ይሳላል!',
-    '',
-    '🥇 1ኛ ሽልማት | 🥈 2ኛ ሽልማት | 🥉 3ኛ ሽልማት'
-  ];
-
-  if (isAdmin) {
-    lines.push('');
-    lines.push('⚙️ የአስተዳዳሪ መዳረሻ አለዎት።');
-  }
-
+  // Button text: emoji only + Latin — avoids ????? on devices without Amharic font
   var keyboard = {
     inline_keyboard: [
-      [{ text: '🎮 ከበርቻቻ ክፈት', web_app: { url: FRONTEND_URL } }]
+      [{ text: '🎰 Open KEBRCHACHA', web_app: { url: FRONTEND_URL } }]
     ]
   };
 
   if (isAdmin) {
     keyboard.inline_keyboard.push([
-      { text: '⚙️ አስተዳዳሪ ዳሽቦርድ', web_app: { url: FRONTEND_URL + '/admin' } }
+      { text: '⚙️ Admin Dashboard', web_app: { url: FRONTEND_URL + '/admin' } }
     ]);
   }
 
-  ctx.reply(lines.join('\n'), { reply_markup: keyboard })
-    .catch(function(err) {
-      console.error('[Bot/start] reply error:', err.message);
+  // Impressive Amharic welcome message (message body supports Amharic fine)
+  var msg = [
+    '🎰✨ *ወደ ከበርቻቻ እንኳን ደህና መጡ!* ✨🎰',
+    '',
+    'ሰላም *' + firstName + '*! 👋',
+    '',
+    '━━━━━━━━━━━━━━━━━━━━━',
+    '🏆 *እንዴት ይጫወታሉ?*',
+    '━━━━━━━━━━━━━━━━━━━━━',
+    '1️⃣  ንቁ ክፍል ይምረጡ',
+    '2️⃣  ቁጥርዎን ይምረጡ \\(1\\-50\\)',
+    '3️⃣  የክፍያ ቅጽበታዊ ምስል ይጫኑ',
+    '4️⃣  የአስተዳዳሪ ማረጋገጫ ይጠብቁ',
+    '5️⃣  ሁሉም ቦታዎች ሲሞሉ ዕጣ ይሳላል\\!',
+    '━━━━━━━━━━━━━━━━━━━━━',
+    '',
+    '🥇 *1ኛ ሽልማት* \\| 🥈 *2ኛ ሽልማት* \\| 🥉 *3ኛ ሽልማት*',
+    '',
+    isAdmin
+      ? '⚙️ _የአስተዳዳሪ መዳረሻ አለዎት_'
+      : '🍀 _መልካም እድል\\!_'
+  ].filter(Boolean).join('\n');
+
+  ctx.replyWithMarkdownV2(msg, { reply_markup: keyboard })
+    .catch(function() {
+      // Fallback: plain text if MarkdownV2 fails
+      var plain = [
+        '� ወደ ከበርቻቻ እንኳን ደህና መጡ!',
+        '',
+        'ሰላም ' + firstName + '! 👋',
+        '',
+        '🏆 እንዴት ይጫወታሉ?',
+        '1. ንቁ ክፍል ይምረጡ',
+        '2. ቁጥርዎን ይምረጡ (1-50)',
+        '3. የክፍያ ቅጽበታዊ ምስል ይጫኑ',
+        '4. ማረጋገጫ ይጠብቁ',
+        '5. ዕጣ ይሳላል!',
+        '',
+        '🥇 1ኛ | 🥈 2ኛ | 🥉 3ኛ ሽልማት',
+        isAdmin ? '\n⚙️ Admin access enabled.' : '\n🍀 Good luck!'
+      ].join('\n');
+      ctx.reply(plain, { reply_markup: keyboard });
     });
 });
 
