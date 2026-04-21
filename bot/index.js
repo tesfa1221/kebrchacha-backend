@@ -102,7 +102,7 @@ bot.help(function(ctx) {
 bot.command('rooms', function(ctx) {
   upsertUser(ctx.from);
 
-  db.execute('SELECT * FROM rooms WHERE status = "active" ORDER BY created_at DESC LIMIT 5')
+  db.execute('SELECT * FROM rooms WHERE status = 'active' ORDER BY created_at DESC LIMIT 5')
     .then(function(results) {
       var rooms = results[0];
       if (!rooms || rooms.length === 0) {

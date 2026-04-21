@@ -17,7 +17,7 @@ router.get('/', auth.requireAuth, function(req, res) {
     '  u.first_name AS creator_first_name',
     'FROM rooms r',
     'JOIN users u ON r.created_by = u.id',
-    'WHERE r.status IN ("active", "locked")',
+    "WHERE r.status IN ("active", "locked")",
     'ORDER BY r.created_at DESC'
   ].join(' ');
 

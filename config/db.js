@@ -26,6 +26,11 @@ var pool = mysql.createPool({
   connectTimeout:     30000
 });
 
+// Fix Aiven ANSI_QUOTES mode — run on every new connection
+pool.on('connection', function(connection) {
+  connection.query("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ANSI_QUOTES',''))");
+});
+
 var promisePool = pool.promise();
 
 pool.getConnection(function(err, connection) {

@@ -54,7 +54,7 @@ router.post('/upload', auth.requireAuth, upload.single('screenshot'), function(r
 
       // Block duplicate payment uploads
       return db.execute(
-        'SELECT id FROM payments WHERE ticket_id = ? AND status IN ("pending","approved")',
+        'SELECT id FROM payments WHERE ticket_id = ? AND status IN ('pending','approved')',
         [ticketId]
       ).then(function(dupResults) {
         if (dupResults[0] && dupResults[0].length > 0) {
@@ -130,7 +130,7 @@ router.get('/pending', auth.requireAdmin, function(req, res) {
 
 /**
  * POST /api/payments/:id/approve
- * Admin only: Approve a payment → ticket becomes "verified" (green/taken)
+ * Admin only: Approve a payment → ticket becomes 'verified' (green/taken)
  */
 router.post('/:id/approve', auth.requireAdmin, function(req, res) {
   var paymentId = parseInt(req.params.id);
@@ -250,7 +250,7 @@ router.post('/:id/reject', auth.requireAdmin, function(req, res) {
       var payment = payments[0];
 
       return db.execute(
-        'UPDATE payments SET status = "rejected", admin_note = ?, reviewed_by = ?, reviewed_at = NOW() WHERE id = ?',
+        'UPDATE payments SET status = "approved", admin_note = ?, reviewed_by = ?, reviewed_at = NOW() WHERE id = ?',
         [note, adminId, paymentId]
       ).then(function() {
         // Reset ticket to allow re-upload

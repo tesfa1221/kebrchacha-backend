@@ -63,7 +63,7 @@ router.post('/reserve', auth.requireAuth, function(req, res) {
     .then(function(results) {
       var ticketId = results[0].insertId;
 
-      // Emit socket event: number is now "pending" (yellow)
+      // Emit socket event: number is now 'pending' (yellow)
       if (req.app.get('io')) {
         req.app.get('io').to('room:' + roomId).emit('ticket:reserved', {
           room_id:  roomId,
