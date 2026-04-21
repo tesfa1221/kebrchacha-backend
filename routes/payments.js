@@ -77,6 +77,36 @@ router.post('/upload', auth.requireAuth, function(req, res) {
             number:     data.ticket.number
           });
         }
+        
+        // Notify admin via Telegram bot
+        var adminTelegramId = parseInt(process.env.ADMIN_TELEGRAM_ID);
+        if (adminTelegramId) {
+          var bot = null;
+          try { bot = require('../bot/index').bot; } catch(e) {}
+          if (bot) {
+            var adminMsg = [
+              '💳 አዲስ ክፍያ ደርሷል!',
+              '',
+              '👤 ተጫዋች: @' + (req.user.username || req.user.first_name || 'unknown'),
+              '🏠 ክፍል: ' + data.ticket.room_title,
+              '🔢 ቁጥር: #' + data.ticket.number,
+              '💰 መጠን: ' + data.ticket.entry_fee + ' ብር',
+              '',
+              '👉 በአስተዳዳሪ ዳሽቦርድ ይገምግሙ'
+            ].join('\n');
+            
+            bot.telegram.sendMessage(adminTelegramId, adminMsg, {
+              reply_markup: {
+                inline_keyboard: [[
+                  { text: '⚙️ ዳሽቦርድ ክፈት', web_app: { url: process.env.FRONTEND_URL + '/admin' } }
+                ]]
+              }
+            }).catch(function(err) {
+              console.error('[Bot] Failed to notify admin:', err.message);
+            });
+          }
+        }
+        
         return res.status(201).json({ message: 'Payment screenshot uploaded. Awaiting admin verification.', payment_id: data.paymentId });
       })
       .catch(function(err) {

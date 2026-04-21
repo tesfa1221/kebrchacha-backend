@@ -51,10 +51,10 @@ bot.start(function(ctx) {
     inline_keyboard: [
       [{ text: '🎮 ጨዋታ ጀምር', web_app: { url: FRONTEND_URL } }],
       [
-        { text: '🏆 ያለፈሥ አሽናፊዎች', web_app: { url: FRONTEND_URL + '/leaderboard' } },
-        { text: '🎫 ትከቶቾ', web_app: { url: FRONTEND_URL + '/my-tickets' } }
+        { text: '📢 ቻናል ይጎብኙ', url: 'https://t.me/keberechacha' },
+        { text: '👥 ግሩፕ ይቀላቀሉ', url: 'https://t.me/+LtpfRVF3KgY2YWE0' }
       ],
-      [{ text: '📞 የደንበኛ አገልጎት', url: 'https://t.me/' + (process.env.SUPPORT_USERNAME || 'kebrchacha_support') }]
+      [{ text: '📞 የደንበኛ አገልግሎት', url: 'https://t.me/Tesfa3362' }]
     ]
   };
 
