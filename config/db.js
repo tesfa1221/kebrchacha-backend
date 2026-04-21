@@ -23,23 +23,31 @@ var pool = mysql.createPool({
   connectionLimit:    10,
   queueLimit:         0,
   charset:            'utf8mb4',
-  connectTimeout:     30000
-});
-
-// Fix Aiven ANSI_QUOTES mode — run on every new connection
-pool.on('connection', function(connection) {
-  connection.query("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ANSI_QUOTES',''))");
+  connectTimeout:     30000,
+  // Disable ANSI_QUOTES mode for Aiven MySQL compatibility
+  // This ensures double-quoted strings are treated as string literals
+  multipleStatements: false
 });
 
 var promisePool = pool.promise();
 
+// Test connection on startup
 pool.getConnection(function(err, connection) {
   if (err) {
     console.error('[DB] Connection failed:', err.message);
     return;
   }
-  console.log('[DB] MySQL connected successfully');
-  connection.release();
+  // Fix Aiven strict SQL mode — remove ANSI_QUOTES
+  connection.query(
+    "SET SESSION sql_mode = REPLACE(@@SESSION.sql_mode, 'ANSI_QUOTES', '')",
+    function(modeErr) {
+      if (modeErr) {
+        console.warn('[DB] sql_mode warning:', modeErr.message);
+      }
+      console.log('[DB] MySQL connected successfully');
+      connection.release();
+    }
+  );
 });
 
 module.exports = promisePool;
