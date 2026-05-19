@@ -33,7 +33,12 @@ var io     = socketIo(server, {
 });
 
 // ─── Middleware ───────────────────────────────────────────────────────────────
-app.use(cors({ origin: '*' }));
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+app.options('*', cors()); // handle preflight for all routes
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -62,6 +67,10 @@ app.use('/api/leaderboard', leaderboardRoutes);
 
 // ─── Health check ─────────────────────────────────────────────────────────────
 app.get('/health', function(req, res) {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+app.get('/api/health', function(req, res) {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 

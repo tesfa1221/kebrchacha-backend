@@ -2,16 +2,16 @@
 
 var rateLimit = require('express-rate-limit');
 
-// General API — 500 requests per 15 min (generous for real users)
+// General API — 1000 requests per 15 min (generous for real users)
 var apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 500,
+  max: 1000,
   message: { error: 'ብዙ ጥያቄዎች። ትንሽ ቆይተው ይሞክሩ።' },
   standardHeaders: true,
   legacyHeaders: false,
   skip: function(req) {
-    // Never rate-limit health checks
-    return req.path === '/health';
+    // Never rate-limit health checks or rooms listing
+    return req.path === '/health' || req.path === '/api/health' || req.path === '/api/rooms';
   }
 });
 
